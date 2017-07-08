@@ -112,7 +112,7 @@ class get_closest_sentences():
 
 if __name__ == "__main__":
 
-    processed_data_path = "/home/cvpr/akshay/TQA/train/processed_data"
+    processed_data_path = "/home/cvpr/akshay/TQA/val/processed_data"
     read_training_json = get_closest_sentences(processed_data_path)
     read_training_json.generate_closest_sentence()
 

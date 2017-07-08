@@ -203,9 +203,10 @@ class read_json():
 
 if __name__ == "__main__":
 
-    json_path = "/home/cvpr/akshay/TQA/train"
+    # json_path = "/home/cvpr/akshay/TQA/train"
+    json_path = "/home/cvpr/akshay/TQA/val"
     read_training_json = read_json(json_path)
     # read_training_json.read_content()
-    # read_training_json.sanity_test()
+    read_training_json.sanity_test()
     read_training_json.get_statistics()
 

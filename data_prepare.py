@@ -155,6 +155,8 @@ class prepare_data():
                         print("doc None : ", lesson)
                     if (complete_correct_ans_mat is None):
                         print("correct answer None : ", lesson)
+                    ### to use categorical crossentropy, make -1 in complete_correct_ans_mat 0
+                    complete_correct_ans_mat[np.where(complete_correct_ans_mat==-1)]=0
                     yield [complete_question_mat, complete_sent_mat, complete_options_mat], complete_correct_ans_mat
                     complete_options_mat = None
                     complete_question_mat = None
