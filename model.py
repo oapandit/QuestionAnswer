@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Dense,TimeDistributed,RepeatVector,Input, LSTM, Merge, Lambda, Masking,Reshape, Activation
+from keras.layers import Dense,TimeDistributed,RepeatVector,Input, LSTM, GRU, Merge, Lambda, Masking,Reshape, Activation
 from keras.layers.merge import Concatenate, Dot
 import keras.backend as K
 from keras import initializers,regularizers,constraints
@@ -218,7 +218,7 @@ class tqa_model():
 
         option_input = Input(shape=(self.max_opt_count,self.max_option_length,300), name='option_input')
         option_mask = TimeDistributed(Masking(mask_value=0.))(option_input)
-        lstm_td_opt = TimeDistributed(lstm_qo)(option_mask)
+        lstm_td_opt = TimeDistributed(lstm_go)(option_mask)
         lstm_doc_rep = RepeatVector(self.max_opt_count)(lstm_doc)
         cossim = Dot(axes=2,normalize=True)([lstm_doc_rep,lstm_td_opt])
         sim1 = sum_dim1(cossim)
@@ -338,6 +338,31 @@ class tqa_model():
         probs = Activation('softmax')(sim1)
         main_model = Model(inputs=[q_input,doc_input,option_input],outputs=probs)
         main_model.compile(loss='categorical_crossentropy',optimizer='sgd',metrics=['accuracy'])
+        main_model.summary()
+        return main_model
+
+    def get_minimal_model_fixed_option_with_softmax(self):
+        cos_sum = Lambda(lambda xin: K.sum(xin, axis = 1)/self.max_opt_count, output_shape=(self.max_opt_count,))
+        sum_dim1 = Lambda(lambda xin: K.sum(xin, axis = 1), output_shape=(300,))
+        sum_dim2 = Lambda(lambda xin: K.sum(xin, axis = 2), output_shape=(7,300))
+        q_input = Input(shape=(self.max_q_length,300),name='question_input')
+        q_dense = Dense(300,use_bias=False)(q_input)
+        q_sum = sum_dim1(q_dense)
+        q_rep=RepeatVector(self.max_doc_length)(q_sum)
+        doc_input = Input(shape=(self.max_doc_length,300),name='doc_input')
+
+        doc_q = Concatenate(axis=-1)([doc_input,q_rep])
+        doc_dense = Dense(300,use_bias=False)(doc_q)
+        doc_sum = sum_dim1(doc_dense)
+        option_input = Input(shape=(self.max_opt_count,self.max_option_length,300), name='option_input')
+        opt_sum = sum_dim2(option_input)
+        doc_rep = RepeatVector(self.max_opt_count)(doc_sum)
+        cossim = Dot(axes=2,normalize=True)([doc_rep,opt_sum])
+        sim1 = cos_sum(cossim)
+        probs = Activation('softmax')(sim1)
+        main_model = Model(inputs=[q_input,doc_input,option_input],outputs=probs)
+        sgd = SGD(lr=0.5, decay=0., momentum=0., nesterov=False)
+        main_model.compile(loss='categorical_crossentropy',optimizer=sgd,metrics=['accuracy'])
         main_model.summary()
         return main_model
 

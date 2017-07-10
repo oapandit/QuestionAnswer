@@ -2,6 +2,7 @@ import os
 import numpy as np
 from model import tqa_model
 from data_prepare import prepare_data
+from result import generate_result
 
 
 class tqa_system():
@@ -23,19 +24,22 @@ class tqa_system():
 
     def train_model(self):
         #model_load_weights_fname = 'minimal(no bias)_model_softmax_wt_120_epochs.h5'
-        #model_fname = "minimal(no bias)_model_softmax_wt_122_epochs.h5"
+        model_fname = "minimal(no bias)_model_softmax_wt_122_epochs.h5"
         read_train_data = prepare_data(self.train_data_path,self.word_vec_size,self.max_q_length,self.max_doc_length,self.max_option_length,self.max_opt_count)
         read_val_data = prepare_data(self.val_data_path, self.word_vec_size, self.max_q_length, self.max_doc_length,
                                        self.max_option_length, self.max_opt_count)
         model = tqa_model(self.word_vec_size,self.max_q_length,self.max_doc_length,self.max_option_length,self.max_opt_count)
         #train_model = model.get_model_show_and_tell(mask=True)
         train_model = model.get_minimal_model_with_softmax()
-        #train_model.load_weights(os.path.join(self.models_path,model_load_weights_fname))
-        print(train_model.optimizer.lr.get_value())
+        # train_model = model.get_masked_model_with_softmax()
+        train_model.load_weights(os.path.join(self.models_path,model_fname))
+        # print(train_model.optimizer.lr.get_value())
         #train_model.fit([question_mat, sent_mat, options_mat], [correct_ans_mat],epochs=self.epochs,batch_size=self.batch_size)
-        train_model.fit_generator(read_train_data.read_all_vectors(),steps_per_epoch=self.steps_per_epoch,epochs = self.nb_epoch,validation_data=read_val_data.read_all_vectors(),validation_steps=self.validation_steps,verbose=1)
+        # train_model.fit_generator(read_train_data.read_all_vectors(),steps_per_epoch=self.steps_per_epoch,epochs = self.nb_epoch,validation_data=read_val_data.read_all_vectors(),validation_steps=self.validation_steps,verbose=1)
 
-        train_model.save_weights(os.path.join(self.models_path,model_fname))
+        # train_model.save_weights(os.path.join(self.models_path,model_fname))
+        get_result = generate_result(read_val_data)
+        get_result.predict_options_one_by_one(train_model,True)
 
 
 if __name__ == "__main__":

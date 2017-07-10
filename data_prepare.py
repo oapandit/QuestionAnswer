@@ -70,12 +70,13 @@ class prepare_data():
             # print(" options : shape : " + str(complete_array_part.shape))
             complete_array = complete_array_part if complete_array is None else np.concatenate((complete_array, complete_array_part), axis=0)
             num_of_options+=1
+        num_act_options = num_of_options
         while num_of_options<self.num_of_options_for_quest:
             complete_array = np.concatenate((complete_array, self.pad_opt_vector), axis=0)
             num_of_options+=1
         complete_array = complete_array.reshape(1,self.num_of_options_for_quest, self.num_of_words_in_opt, self.word_vec_size)
         # print(" options : shape : " + str(complete_array.shape))
-        return complete_array
+        return complete_array,num_act_options
 
     def read_question_file(self,question_dir_path):
         f = open(os.path.join(question_dir_path, self.quest_file), 'r')
@@ -132,7 +133,7 @@ class prepare_data():
                     question_dir_path = os.path.join(l_dir,question_dir)
                     # print ("Question : ", question_dir)
                     try:
-                         options_mat = self.read_options_files(question_dir_path)
+                         options_mat,_ = self.read_options_files(question_dir_path)
                          question_mat = self.read_question_file(question_dir_path)
                          sent_mat = self.read_sentence_file(question_dir_path)
                          correct_ans_mat = self.read_correct_ans_file(question_dir_path)

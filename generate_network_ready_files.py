@@ -139,6 +139,11 @@ class generate_network_ready_files():
 
 if __name__ == "__main__":
 
-    processed_data_path = "/home/cvpr/akshay/TQA/train/processed_data"
-    read_training_json = generate_network_ready_files(processed_data_path)
+    word_vec_size = 300
+    max_q_length = 65
+    max_doc_length = 300
+    max_option_length = 25
+    max_opt_count = 7
+    processed_data_path = "/home/cvpr/akshay/TQA/val/processed_data"
+    read_training_json = generate_network_ready_files(processed_data_path,word_vec_size,max_q_length,max_doc_length,max_option_length,max_opt_count)
     read_training_json.generate_word2vec_for_all()

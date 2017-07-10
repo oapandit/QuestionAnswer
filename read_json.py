@@ -21,11 +21,14 @@ class read_json():
         return dirlist
 
     def get_list_of_files(self,dir_path,file_extension=".json"):
-        filelist = []
-        for root, dirs, files in os.walk(dir_path):
-            for filen in files:
-                if filen.endswith(file_extension):
-                    filelist.append(filen)
+
+        filelist = [name for name in os.listdir(dir_path) if name.endswith(file_extension) and  not os.path.isdir(os.path.join(dir_path, name))]
+
+        # filelist = []
+        # for root, dirs, files in os.walk(dir_path):
+        #     for filen in files:
+        #         if filen.endswith(file_extension):
+        #             filelist.append(filen)
         filelist.sort()
         return filelist
 
@@ -62,7 +65,8 @@ class read_json():
                     # question_f_handle.write(correct_answer + "\n")
                     # question_f_handle.close()
 
-                    q_dir = os.path.join(l_dir,"Q"+str(q_counter+1))
+                    # q_dir = os.path.join(l_dir,"Q"+str(q_counter+1))
+                    q_dir = os.path.join(l_dir,str(ndq_id))
                     os.makedirs(q_dir)
                     question = lessons[qs_tag][ndq_tag][ndq_id]['beingAsked']['processedText']
                     question_f = "Question"+ ".txt"
@@ -87,6 +91,24 @@ class read_json():
                     corr_f_handle = open(os.path.join(q_dir, "correct_answer.txt"), 'w')
                     corr_f_handle.write(correct_answer + "\n")
                     corr_f_handle.close()
+
+    def get_questions_id(self):
+
+        l_id_tag = 'globalID'
+        qs_tag = 'questions'
+        ndq_tag = 'nonDiagramQuestions'
+        ndq_ids_list = []
+        for f in self.json_file_list:
+        # f = "tqa_v1_val.json"
+            with open(os.path.join(self.json_dir,f), 'r') as f:
+                data = json.load(f)
+            for lessons in data:
+                for q_counter,(ndq_id,_) in enumerate(lessons[qs_tag][ndq_tag].iteritems()):
+                    ndq_ids_list.append(ndq_id)
+
+        return ndq_ids_list
+
+
 
 
     def sanity_test(self):
